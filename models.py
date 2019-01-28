@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, Text
+from sqlalchemy import Table, Column, Integer, Text, DateTime
 from sqlalchemy.orm import mapper
 from database import metadata, db_session
 
@@ -9,9 +9,8 @@ class cardInfo(object):
                  cardIDNumber = None, cardName = None, setName = None, typeLine = None, blue = None, green = None,
                  white = None, black = None, red = None, cardPriceUSD = None, lastUpdated = None, foilPrice = None,
                  tcgIdNumber = None):
-
-        self.id = cardIDNumber
-        self.name = cardName
+        self.cardIDNumber = cardIDNumber
+        self.cardName = cardName
         self.setName = setName
         self.typeLine = typeLine
         self.blue = blue
@@ -19,12 +18,12 @@ class cardInfo(object):
         self.white = white
         self.black = black
         self.red = red
-        self.price = cardPriceUSD
+        self.cardPriceUSD = cardPriceUSD
         self.lastUpdated = lastUpdated
         self.foilPrice = foilPrice
         self.tcgIdNumber = tcgIdNumber
 
-card_info = Table('magicCards', metadata,
+magicCards = Table('magicCards', metadata,
                   Column('cardIDNumber', Text, primary_key=True),
                   Column('cardName',Text),
                   Column('setName',Text),
@@ -35,9 +34,9 @@ card_info = Table('magicCards', metadata,
                   Column('black', Integer),
                   Column('red', Integer),
                   Column('cardPriceUSD', Integer),
-                  Column('lastUpdated', Text),
+                  Column('lastUpdated', DateTime),
                   Column('foilPrice', Integer),
                   Column('tcgIdNumber', Integer)
                   )
 
-mapper(cardInfo, card_info)
+mapper(cardInfo, magicCards)
