@@ -6,3 +6,4 @@ lib/
 virt/
 marfFlaskKey.ppk
 marfFlask.pem
+__pycache__/

@@ -84,11 +84,13 @@ def sortCommandsRoute():
     if 'debug' in debugStat:
         query = 'SELECT * FROM sortCommands'
     else:
-        query = 'SELECT * FROM sortCommands WHERE timestamp = (SELECT MAX(timestamp) from sortCommands)'
+        query = 'SELECT * FROM sortCommands WHERE received = 0 ORDER BY timestamp ASC LIMIT 1'
     curse.execute(query)
-    results = curse.fetchall()
-    return parseCommandReturnValues(results)
-
+    results = parseCommandReturnValues(curse.fetchall())
+    updateQuery = 'UPDATE team_marf_db.sortCommands SET received = 1 where received = 0 order by timestamp asc limit 1'
+    curse.execute(updateQuery)
+    teamMarfDB.commit()
+    return results
 
 if __name__ == "__main__":
     app.run(debug=True)
