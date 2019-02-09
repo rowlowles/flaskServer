@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 import mysql.connector
+from datetime import datetime
+from pytz import timezone
 import decimal
 import json
 
@@ -15,6 +17,8 @@ curse = teamMarfDB.cursor()
 
 app = Flask(__name__)
 
+# Constants and other useful variables
+est = timezone('EST')
 columns = ['setName', 'cardName', 'foil', 'blue', 'green', 'red', 'white', 'black', 'cardPriceUSD', 'foilPrice']
 colours = ['blue', 'green', 'red', 'white', 'black']
 skipColumns = ['setName', 'cardName'] + colours
@@ -91,6 +95,20 @@ def sortCommandsRoute():
     curse.execute(updateQuery)
     teamMarfDB.commit()
     return results
+
+
+@app.route('/postCommand', methods=['POST'])
+def postCommand():
+    message = request.get_json()
+    sortType = message['sortType']
+    categories = {"categories": message['categories']}
+    numCats = len(categories['categories'])
+    timestamp = datetime.now(est)
+    sortObj = (timestamp, sortType, numCats, json.dumps(categories))
+    query = "INSERT INTO sortCommands (timestamp, sortType, numCat, categories) VALUES (%s, %s, %s, %s)"
+    curse.execute(query, sortObj)
+    teamMarfDB.commit()
+    return jsonify({"message": 'Post successful'})
 
 if __name__ == "__main__":
     app.run(debug=True)
