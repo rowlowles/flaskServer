@@ -75,6 +75,7 @@ def parseCommandReturnValues(results):
     """
     returnObject = []
     for command in results:
+        # print(command)
         commandObject = {'type': 0, 'data': {'sortType': None, 'numCat': None, 'categories': None}}
         commandObject['data']['sortType'] = command[1]
         commandObject['data']['numCat'] = command[2]
@@ -101,7 +102,7 @@ def cardInfoRoute():
     query = 'SELECT %s FROM magicCards WHERE cardName = \"%s\"' % (colString, cardName)
     if 'limit' in message:
         query += ' LIMIT 1'
-    curse.execute(query, cardName)
+    curse.execute(query)
     results = curse.fetchall()
     return parseCardReturnValues(results, cardName)
 
@@ -157,8 +158,9 @@ def postCollection():
     name = message['userName']
     value = message['collectionValue']
     collection = json.dumps(message['collection'])
-    query = 'INSERT INTO userCards (userName, userCollectionValue, userCardCollection) VALUES (%s %s %s) ON DUPLICATE' \
-            'KEY UPDATE userCollectionValue=%s, userCardCollection = %s' % (name, value, collection, value, collection)
+    query = 'INSERT INTO userCards (userName, userCollectionValue, userCardCollection) VALUES (\'%s\', %s, \'%s\') ON DUPLICATE' \
+            ' KEY UPDATE userCollectionValue=%s, userCardCollection = \'%s\'' % (name, value, collection, value, collection)
+    print(query)
     curse.execute(query)
     teamMarfDB.commit()
     return jsonify({"message": 'Post successful'})
