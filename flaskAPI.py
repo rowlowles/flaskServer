@@ -38,7 +38,7 @@ def parseCardReturnValues(results, cardName):
     :param cardName: The card name searched for
     :return: JSON string in above format
     """
-    cardList = {"type": 1, "cardInfo": {"cardName": cardName, "sets": []}, "sets": {}}
+    cardList = {"type": 1, "cardInfo": {"cardName": cardName, "colour": {}, "sets": []}, "sets": {}}
     for index, result in enumerate(results):
         setNameIndex = columns.index('setName')
         setName = result[setNameIndex]
@@ -50,7 +50,7 @@ def parseCardReturnValues(results, cardName):
             # Append colours to parent dictionary
             for colour in colours:
                 colourVal = result[columns.index(colour)]
-                cardList["cardInfo"][colour] = colourVal
+                cardList["cardInfo"]['colour'][colour] = colourVal
 
         for item, key in zip(result, columns):
             if key in skipColumns:
