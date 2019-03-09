@@ -76,10 +76,11 @@ def parseCommandReturnValues(results):
     returnObject = []
     for command in results:
         # print(command)
-        commandObject = {'type': 0, 'data': {'sortType': None, 'numCat': None, 'categories': None}}
+        commandObject = {'type': 0, 'data': {'sortType': None, 'numCat': None, 'categories': None, 'userName': None}}
         commandObject['data']['sortType'] = command[1]
         commandObject['data']['numCat'] = command[2]
         commandObject['data']['categories'] = json.loads(command[3])['categories']
+        commandObject['data']['userName'] = command[5]
         returnObject.append(commandObject)
 
     return jsonify(returnObject)
