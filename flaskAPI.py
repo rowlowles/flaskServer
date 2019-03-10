@@ -75,7 +75,6 @@ def parseCommandReturnValues(results):
     """
     returnObject = []
     for command in results:
-        # print(command)
         commandObject = {'type': 0, 'data': {'sortType': None, 'numCat': None, 'categories': None}}
         commandObject['data']['sortType'] = command[1]
         commandObject['data']['numCat'] = command[2]
@@ -83,6 +82,21 @@ def parseCommandReturnValues(results):
         returnObject.append(commandObject)
 
     return jsonify(returnObject)
+
+def parseCollectionReturnValues(results):
+    """
+    Take the list of collection objects and parse them into an easy to use format. Return format is:
+    {"username":..., "value":..., "collection":...}
+    :param results:
+    :return:
+    """
+    info = results[0]
+    collectionObject = {'username': None, 'value': 0, 'collection': None}
+    collectionObject['username']= info[0]
+    collectionObject['collection'] = info[1]
+    collectionObject['value'] = info[2]
+
+    return jsonify(collectionObject)
 
 
 @app.route('/')
@@ -129,7 +143,6 @@ def sortCommandsRoute():
     teamMarfDB.commit()
     return results
 
-
 @app.route('/postCommand', methods=['POST'])
 def postCommand():
     """
@@ -160,10 +173,21 @@ def postCollection():
     collection = json.dumps(message['collection'])
     query = 'INSERT INTO userCards (userName, userCollectionValue, userCardCollection) VALUES (\'%s\', %s, \'%s\') ON DUPLICATE' \
             ' KEY UPDATE userCollectionValue=%s, userCardCollection = \'%s\'' % (name, value, collection, value, collection)
-    print(query)
     curse.execute(query)
     teamMarfDB.commit()
     return jsonify({"message": 'Post successful'})
+
+@app.route('/getCollection', methods=['GET'])
+def getCollection():
+    """
+    Get a user's collection
+    :return:
+    """
+    query = 'SELECT * FROM userCards'
+    curse.execute(query)
+    results = parseCollectionReturnValues(curse.fetchall())
+
+    return results
 
 
 if __name__ == "__main__":
