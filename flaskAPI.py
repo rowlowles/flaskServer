@@ -4,6 +4,7 @@ from datetime import datetime
 from pytz import timezone
 import decimal
 import json
+import ast
 
 secrets = json.load(open('secrets.json', encoding="utf8"))
 teamMarfDB = mysql.connector.connect(
@@ -25,6 +26,13 @@ skipColumns = ['setName', 'cardName'] + colours
 colString = ', '.join(columns)
 placeHolders = ', '.join(['%s']*len(columns))
 
+def parseCollectionReturnValues(results):
+    if len(results):
+        # We need to convert the json string to a python list to do list operations on it
+        return {'collection': ast.literal_eval(results[0][1]), 'collectionValue': results[0][2]}
+
+    else:
+        return {'collection': [], 'collectionValue': 0}
 
 def parseCardReturnValues(results, cardName):
     """
@@ -123,6 +131,7 @@ def sortCommandsRoute():
     results = parseCommandReturnValues(curse.fetchall())
 
     if 'debug' not in debugStat:
+        # Set the command to be received
         updateQuery = 'UPDATE team_marf_db.sortCommands SET received = 1 WHERE received = 0 ' \
                       'ORDER BY timestamp ASC LIMIT 1'
         curse.execute(updateQuery)
@@ -156,13 +165,23 @@ def postCollection():
     :return:
     """
     message = request.get_json()
-    name = message['userName']
+    userName = message['userName']
     value = message['collectionValue']
-    collection = json.dumps(message['collection'])
-    query = 'INSERT INTO userCards (userName, userCollectionValue, userCardCollection) VALUES (\'%s\', %s, \'%s\') ON DUPLICATE' \
-            ' KEY UPDATE userCollectionValue=%s, userCardCollection = \'%s\'' % (name, value, collection, value, collection)
-    print(query)
-    curse.execute(query)
+    collection = message['collection']
+
+    getQuery = 'SELECT * FROM userCards where userName = \'%s\'' % userName
+    curse.execute(getQuery)
+    results = parseCollectionReturnValues(curse.fetchall())
+
+    value += results['collectionValue']
+    collection.extend(results['collection'])
+
+    # Convert list to json object so it can be posted in MySQL
+    collection = json.dumps(collection)
+
+    updateQuery = 'INSERT INTO userCards (userName, userCollectionValue, userCardCollection) VALUES (\'%s\', %s, \'%s\') ON DUPLICATE' \
+            ' KEY UPDATE userCollectionValue=%s, userCardCollection = \'%s\'' % (userName, value, collection, value, collection)
+    curse.execute(updateQuery)
     teamMarfDB.commit()
     return jsonify({"message": 'Post successful'})
 
