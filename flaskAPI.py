@@ -12,7 +12,8 @@ teamMarfDB = mysql.connector.connect(
     port=secrets['port'],
     user=secrets['user'],
     password=secrets['password'],
-    db=secrets['db']
+    db=secrets['db'],
+    connection_timeout=259200
 )
 curse = teamMarfDB.cursor()
 
@@ -93,7 +94,8 @@ def parseCommandReturnValues(results):
 
     return jsonify(returnObject)
 
-def parseCollectionReturnValues(results):
+
+def parseCollectionAllReturnValues(results):
     """
     Take the list of collection objects and parse them into an easy to use format. Return format is:
     {"username":..., "value":..., "collection":...}
@@ -207,7 +209,7 @@ def getCollection():
     """
     query = 'SELECT * FROM userCards'
     curse.execute(query)
-    results = parseCollectionReturnValues(curse.fetchall())
+    results = parseCollectionAllReturnValues(curse.fetchall())
 
     return results
 
