@@ -7,3 +7,5 @@ virt/
 marfFlaskKey.ppk
 marfFlask.pem
 __pycache__/
+cardData.csv
+marf.sql

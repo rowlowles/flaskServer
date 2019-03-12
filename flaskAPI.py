@@ -5,6 +5,7 @@ from pytz import timezone
 import decimal
 import json
 import ast
+import sqlite3
 
 secrets = json.load(open('secrets.json', encoding="utf8"))
 teamMarfDB = mysql.connector.connect(
@@ -16,6 +17,9 @@ teamMarfDB = mysql.connector.connect(
     connection_timeout=259200
 )
 curse = teamMarfDB.cursor()
+
+localDB = sqlite3.connect('./localdata.db', check_same_thread=False)
+localCurse = localDB.cursor()
 
 app = Flask(__name__)
 
@@ -34,6 +38,7 @@ def parseCollectionReturnValues(results):
 
     else:
         return {'collection': [], 'collectionValue': 0}
+
 
 def parseCardReturnValues(results, cardName):
     """
@@ -128,8 +133,8 @@ def cardInfoRoute():
     query = 'SELECT %s FROM magicCards WHERE cardName = \"%s\"' % (colString, cardName)
     if 'limit' in message:
         query += ' LIMIT 1'
-    curse.execute(query)
-    results = curse.fetchall()
+    localCurse.execute(query)
+    results = localCurse.fetchall()
     return parseCardReturnValues(results, cardName)
 
 
